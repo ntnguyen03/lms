@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Xem thông tin {{ viewed_user.username }} - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user me-2"></i>Thông tin người dùng: {{ viewed_user.username }}</h2>
+    <div>
+        <a href="{{ url_for('edit_user', user_id=viewed_user.id) }}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Chỉnh sửa
+        </a>
+        <a href="{{ url_for('users') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="chart-container">
+            <div class="text-center mb-3">
+                <div class="user-avatar mx-auto" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                    {{ viewed_user.username[:2].upper() }}
+                </div>
+            </div>
+            <h4 class="text-center">{{ viewed_user.username }}</h4>
+            <p class="text-center">
+                <span class="badge bg-{{ 'success' if viewed_user.role == 'student' else 'warning' }} px-3 py-2">
+                    {{ viewed_user.role.title() }}
+                </span>
+            </p>
+            <hr>
+            <div class="info-item mb-3">
+                <strong><i class="fas fa-id-badge me-2"></i>ID:</strong>
+                <span class="float-end">{{ viewed_user.id }}</span>
+            </div>
+            <div class="info-item mb-3">
+                <strong><i class="fas fa-calendar me-2"></i>Tham gia:</strong>
+                <span class="float-end">{{ enrollments|length }} khóa học</span>
+            </div>
+            <div class="info-item mb-3">
+                <strong><i class="fas fa-tasks me-2"></i>Bài nộp:</strong>
+                <span class="float-end">{{ submissions_count }}</span>
+            </div>
+            <div class="info-item mb-3">
+                <strong><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập:</strong>
+                <span class="float-end">{{ login_count }} lần</span>
+            </div>
+            {% if viewed_user.role == 'student' %}
+            <div class="info-item mb-3">
+                <strong><i class="fas fa-star me-2"></i>Điểm TB:</strong>
+                <span class="float-end badge bg-{{ 'success' if avg_score >= 7 else 'warning' if avg_score >= 5 else 'danger' }}">
+                    {{ avg_score }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        {% if viewed_user.role == 'student' %}
+        <div class="chart-container mb-4">
+            <h5 class="mb-3"><i class="fas fa-book me-2"></i>Khóa học đã đăng ký</h5>
+            {% if enrollments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Khóa học</th>
+                            <th>Giảng viên</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('course_detail', course_id=enrollment.course.id) }}">
+                                    {{ enrollment.course.name }}
+                                </a>
+                            </td>
+                            <td>{{ enrollment.course.teacher.username }}</td>
+                            <td><span class="badge bg-success">Đang học</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">Chưa đăng ký khóa học nào</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="chart-container mb-4">
+            <h5 class="mb-3"><i class="fas fa-chalkboard-teacher me-2"></i>Khóa học giảng dạy</h5>
+            {% set teacher_courses = viewed_user.created_courses %}
+            {% if teacher_courses %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Khóa học</th>
+                            <th>Sinh viên</th>
+                            <th>Bài tập</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in teacher_courses %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('course_detail', course_id=course.id) }}">
+                                    {{ course.name }}
+                                </a>
+                            </td>
+                            <td>{{ course.enrollments|length }}</td>
+                            <td>{{ course.assignments|length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">Chưa tạo khóa học nào</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Kết quả tìm kiếm - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Kết quả tìm kiếm cho "{{ query }}"</h2>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h5>Người dùng ({{ users|length }})</h5>
+            {% if users %}
+            <ul class="list-group">
+                {% for user in users %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ user.username }}</strong>
+                        <div class="text-muted small">Vai trò: {{ user.role }}</div>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('teacher_view_student', student_id=user.id) }}" class="btn btn-sm btn-outline-primary">Xem</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state py-4 text-center">
+                <i class="fas fa-user-slash fa-2x text-muted mb-2"></i>
+                <p class="text-muted">Không tìm thấy người dùng nào.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h5>Khóa học ({{ courses|length }})</h5>
+            {% if courses %}
+            <div class="row">
+                {% for course in courses %}
+                <div class="col-12 mb-2">
+                    <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                        <div>
+                            <strong>{{ course.name }}</strong>
+                            <div class="text-muted small">{{ course.description[:120] }}</div>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-sm btn-outline-primary">Xem</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state py-4 text-center">
+                <i class="fas fa-book-reader fa-2x text-muted mb-2"></i>
+                <p class="text-muted">Không tìm thấy khóa học nào.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

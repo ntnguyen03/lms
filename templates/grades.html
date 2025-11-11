@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý điểm - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-bar me-2"></i>{% if role == 'teacher' %}Quản lý điểm{% else %}Điểm của tôi{% endif %}</h2>
+</div>
+
+{% if role == 'teacher' %}
+<!-- Teacher view: Xem tất cả điểm sinh viên -->
+<div class="chart-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Bảng điểm tất cả sinh viên</h5>
+        <div class="input-group" style="width: 300px;">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="searchStudent" placeholder="Tìm sinh viên...">
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover" id="gradesTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sinh viên</th>
+                    <th>Số khóa học</th>
+                    <th>Bài đã nộp</th>
+                    <th>Điểm TB</th>
+                    <th>Xếp loại</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in student_grades %}
+                <tr>
+                    <td>{{ item.student.id }}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                {{ item.student.username[:2].upper() }}
+                            </div>
+                            <span>{{ item.student.username }}</span>
+                        </div>
+                    </td>
+                    <td>{{ item.courses_count }}</td>
+                    <td>{{ item.submissions_count }}</td>
+                    <td>
+                        <strong class="text-{{ 'success' if item.avg_score >= 7 else 'warning' if item.avg_score >= 5 else 'danger' }}">
+                            {{ item.avg_score }}
+                        </strong>
+                    </td>
+                    <td>
+                        {% if item.avg_score >= 8.5 %}
+                        <span class="badge bg-success">Xuất sắc</span>
+                        {% elif item.avg_score >= 7 %}
+                        <span class="badge bg-primary">Khá</span>
+                        {% elif item.avg_score >= 5 %}
+                        <span class="badge bg-warning">Trung bình</span>
+                        {% else %}
+                        <span class="badge bg-danger">Yếu</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('view_user', user_id=item.student.id) }}" 
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchStudent').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#gradesTable tbody tr');
+    
+    rows.forEach(row => {
+        const studentName = row.cells[1].textContent.toLowerCase();
+        if (studentName.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
+
+{% else %}
+<!-- Student view: Chỉ xem điểm của mình -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="metric-details">
+                <h3>{{ courses_with_grades|length }}</h3>
+                <p>Khóa học</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="metric-details">
+                {% set total_submissions = 0 %}
+                {% for course in courses_with_grades %}
+                    {% set total_submissions = total_submissions + course.submissions|length %}
+                {% endfor %}
+                <h3>{{ total_submissions }}</h3>
+                <p>Bài đã nộp</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-card">
+            <div class="metric-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="metric-details">
+                {% set total_score = 0 %}
+                {% set score_count = 0 %}
+                {% for course in courses_with_grades %}
+                    {% for sub in course.submissions %}
+                        {% if sub.score %}
+                            {% set total_score = total_score + sub.score %}
+                            {% set score_count = score_count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                <h3>{{ (total_score / score_count) | round(1) if score_count > 0 else 0 }}</h3>
+                <p>Điểm trung bình</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for course_data in courses_with_grades %}
+<div class="chart-container mb-4">
+    <h5 class="mb-3">
+        <i class="fas fa-book me-2"></i>{{ course_data.course.name }}
+        <span class="badge bg-{{ 'success' if course_data.avg_score >= 7 else 'warning' if course_data.avg_score >= 5 else 'danger' }} ms-2">
+            Điểm TB: {{ course_data.avg_score }}
+        </span>
+    </h5>
+    
+    {% if course_data.submissions %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Bài tập</th>
+                    <th>Hạn nộp</th>
+                    <th>Điểm</th>
+                    <th>Xếp loại</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in course_data.submissions %}
+                <tr>
+                    <td>{{ submission.assignment.title }}</td>
+                    <td>
+                        {% if submission.assignment.deadline %}
+                        {{ submission.assignment.deadline.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                        <span class="text-muted">Không có</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if submission.score %}
+                        <strong class="text-{{ 'success' if submission.score >= 7 else 'warning' if submission.score >= 5 else 'danger' }}">
+                            {{ submission.score }}/10
+                        </strong>
+                        {% else %}
+                        <span class="badge bg-secondary">Chưa chấm</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if submission.score %}
+                            {% if submission.score >= 8.5 %}
+                            <span class="badge bg-success">Xuất sắc</span>
+                            {% elif submission.score >= 7 %}
+                            <span class="badge bg-primary">Khá</span>
+                            {% elif submission.score >= 5 %}
+                            <span class="badge bg-warning">Trung bình</span>
+                            {% else %}
+                            <span class="badge bg-danger">Yếu</span>
+                            {% endif %}
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-muted text-center py-4">Chưa có bài nộp nào</p>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% if not courses_with_grades %}
+<div class="chart-container text-center py-5">
+    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+    <h5 class="text-muted">Bạn chưa đăng ký khóa học nào</h5>
+    <a href="{{ url_for('courses') }}" class="btn btn-primary mt-3">
+        <i class="fas fa-plus me-2"></i>Đăng ký khóa học
+    </a>
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}
+

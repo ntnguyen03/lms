@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Chỉnh sửa {{ course.name }} - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-edit me-2"></i>Chỉnh sửa khóa học</h2>
+    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Quay lại
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <form method="POST" action="{{ url_for('edit_course', course_id=course.id) }}">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Tên khóa học</label>
+                    <input type="text" class="form-control" id="name" name="name" 
+                           value="{{ course.name }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Mô tả</label>
+                    <textarea class="form-control" id="description" name="description" 
+                              rows="5" required>{{ course.description }}</textarea>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+                    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-secondary">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,712 @@
+{% extends "base.html" %}
+
+{% block title %}Phân tích dữ liệu - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Phân tích dữ liệu</h2>
+    <div class="d-flex align-items-center" style="gap:0.5rem;">
+        <button class="btn btn-gradient btn-lg d-flex align-items-center" id="toggleChartsBtn" onclick="toggleAllCharts()">
+            <i class="fas fa-chart-bar me-2"></i>
+            <span>Hiển thị biểu đồ phân tích</span>
+        </button>
+
+        <div class="d-flex" style="gap:0.5rem;">
+            <button class="btn btn-outline-secondary" onclick="refreshCharts()">
+                <i class="fas fa-sync-alt me-2"></i>Làm mới
+            </button>
+            <button class="btn btn-outline-success" onclick="exportData()">
+                <i class="fas fa-download me-2"></i>Xuất dữ liệu
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Small visual polish for analytics action buttons */
+.btn-gradient{
+    /* Use app theme colors (defined in base.html) and keep a stable size to avoid layout shift
+       when the button text changes (e.g. "Hiển thị..." <-> "Ẩn...") */
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    border-radius: 8px;
+    width: 280px; /* fixed width so the button stays immobile */
+    height: 37px;
+    padding: 0 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap; /* prevent wrapping when text changes */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 0 auto;
+}
+
+.btn-gradient.charts-visible{
+    /* danger tone when charts are visible; uses app color variables */
+    background: linear-gradient(90deg, var(--danger-color) 0%, rgba(239,68,68,0.85) 100%);
+}
+.btn-gradient:hover{ opacity:0.95; }
+.stats-card{ background:#fff; padding:1rem; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.03); }
+.empty-state{ text-align:center; padding:2rem 1rem; }
+@media (max-width:768px){
+    .btn-gradient{ width:100%; }
+    .d-flex.align-items-center > .d-flex{ width:100%; justify-content:space-between; }
+}
+</style>
+
+<!-- Analytics Overview -->
+<div class="row mb-4">
+    {% if role == 'teacher' %}
+    <!-- Teacher View -->
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Tổng lượt xem</h6>
+                    <h3 class="mb-0 text-primary">{{ total_views }}</h3>
+                    <small class="text-success">+12.5% so với tháng trước</small>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-eye fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Tỷ lệ hoàn thành</h6>
+                    <h3 class="mb-0 text-success">{{ completion_rate }}%</h3>
+                    <small class="text-success">+5.2% so với tháng trước</small>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Tổng sinh viên</h6>
+                    <h3 class="mb-0 text-warning">{{ total_students }}</h3>
+                    <small class="text-warning">+10 sinh viên mới</small>
+                </div>
+                <div class="text-warning">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Điểm TB</h6>
+                    <h3 class="mb-0 text-{{ 'success' if avg_score >= 7 else 'warning' if avg_score >= 5 else 'danger' }}">{{ avg_score }}</h3>
+                    <small class="text-success">Toàn hệ thống</small>
+                </div>
+                <div class="text-{{ 'success' if avg_score >= 7 else 'warning' if avg_score >= 5 else 'danger' }}">
+                    <i class="fas fa-star fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Student View -->
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Lượt đăng nhập</h6>
+                    <h3 class="mb-0 text-primary">{{ login_count }}</h3>
+                    <small class="text-muted">Tổng số lần</small>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-sign-in-alt fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Bài đã nộp</h6>
+                    <h3 class="mb-0 text-success">{{ total_submissions }}</h3>
+                    <small class="text-success">Tất cả các khóa</small>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-tasks fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Khóa học</h6>
+                    <h3 class="mb-0 text-warning">{{ courses_enrolled }}</h3>
+                    <small class="text-warning">Đang tham gia</small>
+                </div>
+                <div class="text-warning">
+                    <i class="fas fa-book fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Điểm TB</h6>
+                    <h3 class="mb-0 text-{{ 'success' if avg_score >= 7 else 'warning' if avg_score >= 5 else 'danger' }}">{{ avg_score }}</h3>
+                    <small class="text-muted">Của bạn</small>
+                </div>
+                <div class="text-{{ 'success' if avg_score >= 7 else 'warning' if avg_score >= 5 else 'danger' }}">
+                    <i class="fas fa-star fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Charts Section - Hidden by default -->
+<div id="chartsSection" class="collapse">
+    <div class="row mb-4">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Xu hướng học tập theo tháng</h5>
+                <button class="btn btn-sm btn-outline-secondary collapse-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#trendChartSection">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="trendChartSection">
+                {% if role == 'teacher' and monthly_data %}
+                <div style="position: relative; height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line fa-4x text-muted mb-3 d-block"></i>
+                    <h6 class="text-muted mb-2">Chưa có dữ liệu xu hướng</h6>
+                    <small class="text-muted">Dữ liệu sẽ xuất hiện khi có hoạt động học tập</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Phân bố điểm số</h5>
+                <button class="btn btn-sm btn-outline-secondary collapse-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#scoreDistSection">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="scoreDistSection">
+                {% if score_distribution.excellent + score_distribution.good + score_distribution.average + score_distribution.poor > 0 %}
+                <div style="position: relative; height: 250px;">
+                    <canvas id="scoreDistributionChart"></canvas>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-pie fa-4x text-muted mb-3 d-block"></i>
+                    <h6 class="text-muted mb-2">Chưa có dữ liệu điểm số</h6>
+                    <small class="text-muted">Dữ liệu sẽ xuất hiện khi có bài nộp được chấm điểm</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">
+                    {% if role == 'teacher' %}
+                    Khóa học phổ biến nhất
+                    {% else %}
+                    Điểm trung bình theo khóa học
+                    {% endif %}
+                </h5>
+                <button class="btn btn-sm btn-outline-secondary collapse-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#popularCoursesSection">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="popularCoursesSection">
+                {% if (role == 'teacher' and top_courses) or (role == 'student' and course_scores) %}
+                <div style="position: relative; height: 300px;">
+                    <canvas id="popularCoursesChart"></canvas>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-book fa-4x text-muted mb-3 d-block"></i>
+                    <h6 class="text-muted mb-2">
+                        {% if role == 'teacher' %}
+                        Chưa có khóa học nào
+                        {% else %}
+                        Bạn chưa đăng ký khóa học
+                        {% endif %}
+                    </h6>
+                    <p class="text-muted small mb-3">
+                        {% if role == 'teacher' %}
+                        Tạo khóa học đầu tiên để bắt đầu
+                        {% else %}
+                        Đăng ký khóa học để bắt đầu học tập
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('courses') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        {% if role == 'teacher' %}Tạo khóa học{% else %}Khám phá khóa học{% endif %}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Thời gian học theo giờ</h5>
+                <button class="btn btn-sm btn-outline-secondary collapse-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#studyTimeSection">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="studyTimeSection">
+                <div class="empty-state">
+                    <i class="fas fa-clock fa-4x text-muted mb-3 d-block"></i>
+                    <h6 class="text-muted mb-2">Tính năng đang phát triển</h6>
+                    <small class="text-muted">Biểu đồ thời gian học sẽ sớm được cập nhật</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- End Charts Section -->
+
+<!-- Excel Data Analysis -->
+{% if sales_summary %}
+<div class="row">
+    <div class="col-12">
+        <div class="chart-container">
+            <h5 class="mb-3">Phân tích dữ liệu Excel (DuLieu_BanHang.xlsx)</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-table fa-2x text-primary mb-2"></i>
+                            <h4>{{ sales_summary.num_rows if sales_summary.num_rows is defined else sales_summary['num_rows'] }}</h4>
+                            <p class="text-muted mb-0">Số dòng dữ liệu</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-columns fa-2x text-success mb-2"></i>
+                            <h4>{{ (sales_summary.columns if sales_summary.columns is defined else sales_summary['columns']) | length }}</h4>
+                            <p class="text-muted mb-0">Số cột</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                            <h4>{{ ((sales_summary.totals if sales_summary.totals is defined else sales_summary['totals']) | length) if (sales_summary.totals is defined or sales_summary['totals']) else 0 }}</h4>
+                            <p class="text-muted mb-0">Chỉ số phân tích</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if sales_summary.totals is defined or sales_summary['totals'] %}
+            <div class="mt-4">
+                <h6>Chi tiết phân tích:</h6>
+                <div class="row">
+                    {% for key, value in (sales_summary.totals if sales_summary.totals is defined else sales_summary['totals']).items() %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                            <span class="fw-bold">{{ key }}:</span>
+                            <span class="badge bg-primary">{{ value }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Data Export Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="chart-container">
+            <h5 class="mb-3">Xuất dữ liệu</h5>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-outline-primary w-100" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Xuất Excel
+                    </button>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-outline-success w-100" onclick="exportToCSV()">
+                        <i class="fas fa-file-csv me-2"></i>Xuất CSV
+                    </button>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-outline-info w-100" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Xuất PDF
+                    </button>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-outline-warning w-100" onclick="printReport()">
+                        <i class="fas fa-print me-2"></i>In báo cáo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let chartsInitialized = false;
+let chartInstances = {};
+
+// Toggle all charts function
+function toggleAllCharts() {
+    const chartsSection = document.getElementById('chartsSection');
+    const toggleBtn = document.getElementById('toggleChartsBtn');
+    const bsCollapse = new bootstrap.Collapse(chartsSection, { toggle: false });
+
+    // Update only the icon and the text node to avoid replacing the whole innerHTML
+    const icon = toggleBtn.querySelector('i');
+    const textSpan = toggleBtn.querySelector('span');
+
+    if (chartsSection.classList.contains('show')) {
+        // Hide charts
+        bsCollapse.hide();
+        if (icon) icon.className = 'fas fa-chart-bar me-2';
+        if (textSpan) textSpan.textContent = 'Hiển thị biểu đồ phân tích';
+        // Use our small state class so we don't trigger Bootstrap's btn sizing changes
+        toggleBtn.classList.remove('charts-visible');
+    } else {
+        // Show charts
+        bsCollapse.show();
+        if (icon) icon.className = 'fas fa-eye-slash me-2';
+        if (textSpan) textSpan.textContent = 'Ẩn biểu đồ phân tích';
+        toggleBtn.classList.add('charts-visible');
+        // Charts will be initialized automatically via event listener
+    }
+}
+
+// Ensure the button reflects initial collapse state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const chartsSection = document.getElementById('chartsSection');
+    const toggleBtn = document.getElementById('toggleChartsBtn');
+    if (chartsSection && toggleBtn) {
+        if (chartsSection.classList.contains('show')) {
+            toggleBtn.classList.add('charts-visible');
+        } else {
+            toggleBtn.classList.remove('charts-visible');
+        }
+    }
+});
+
+// Toggle collapse icon for individual sections
+document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+    const target = document.querySelector(button.dataset.bsTarget);
+    if (target) {
+        target.addEventListener('show.bs.collapse', () => {
+            button.querySelector('i').className = 'fas fa-chevron-up';
+        });
+        target.addEventListener('hide.bs.collapse', () => {
+            button.querySelector('i').className = 'fas fa-chevron-down';
+        });
+    }
+});
+
+// Initialize all charts
+function initializeCharts() {
+    console.log('=== Initializing charts... ===');
+    console.log('Chart.js available:', typeof Chart !== 'undefined');
+    
+    // Destroy existing charts first to prevent duplicates
+    if (chartInstances.trend) {
+        chartInstances.trend.destroy();
+        console.log('Destroyed existing trend chart');
+    }
+    if (chartInstances.scoreDist) {
+        chartInstances.scoreDist.destroy();
+        console.log('Destroyed existing score distribution chart');
+    }
+    if (chartInstances.popularCourses) {
+        chartInstances.popularCourses.destroy();
+        console.log('Destroyed existing popular courses chart');
+    }
+    
+    // Trend Chart - Only initialize if canvas exists
+    const trendCanvas = document.getElementById('trendChart');
+    console.log('Trend canvas found:', trendCanvas !== null);
+    if (trendCanvas) {
+        console.log('Trend canvas dimensions:', trendCanvas.width, 'x', trendCanvas.height);
+        const trendCtx = trendCanvas.getContext('2d');
+        {% if role == 'teacher' and monthly_data %}
+        // Use real data from backend
+        var monthLabels = {{ monthly_data.keys()|list|tojson }};
+        var viewsData = [];
+        var submissionsData = [];
+        {% for month, data in monthly_data.items() %}
+        viewsData.push({{ data.views }});
+        submissionsData.push({{ data.submissions }});
+        {% endfor %}
+        
+        console.log('Creating trend chart with data:', monthLabels, viewsData, submissionsData);
+        try {
+            chartInstances.trend = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: monthLabels.reverse(),
+                datasets: [{
+                    label: 'Lượt xem',
+                    data: viewsData.reverse(),
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Bài nộp',
+                    data: submissionsData.reverse(),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Completely disable animation
+                transitions: {
+                    active: {
+                        animation: {
+                            duration: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                onResize: null, // Disable resize handler
+                resizeDelay: 0
+            }
+        });
+            console.log('✓ Trend chart initialized successfully');
+        } catch (error) {
+            console.error('✗ Error initializing trend chart:', error);
+        }
+        {% else %}
+        console.log('Trend chart skipped: not teacher or no monthly_data');
+        {% endif %}
+    } else {
+        console.log('Trend canvas not found in DOM');
+    }
+
+    // Score Distribution Chart - Only initialize if canvas exists
+    const scoreDistCanvas = document.getElementById('scoreDistributionChart');
+    console.log('Score dist canvas found:', scoreDistCanvas !== null);
+    if (scoreDistCanvas) {
+        console.log('Score dist canvas dimensions:', scoreDistCanvas.width, 'x', scoreDistCanvas.height);
+        const scoreCtx = scoreDistCanvas.getContext('2d');
+        try {
+            chartInstances.scoreDist = new Chart(scoreCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['9-10 điểm', '7-9 điểm', '5-7 điểm', 'Dưới 5 điểm'],
+                datasets: [{
+                    data: [{{ score_distribution.excellent }}, {{ score_distribution.good }}, {{ score_distribution.average }}, {{ score_distribution.poor }}],
+                    backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                transitions: {
+                    active: {
+                        animation: {
+                            duration: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                onResize: null,
+                resizeDelay: 0
+            }
+        });
+            console.log('✓ Score distribution chart initialized successfully');
+        } catch (error) {
+            console.error('✗ Error initializing score distribution chart:', error);
+        }
+    } else {
+        console.log('Score dist canvas not found in DOM');
+    }
+
+    // Popular Courses Chart - Only initialize if canvas exists and has data
+    const popularCoursesCanvas = document.getElementById('popularCoursesChart');
+    console.log('Popular courses canvas found:', popularCoursesCanvas !== null);
+    if (popularCoursesCanvas) {
+        console.log('Popular courses canvas dimensions:', popularCoursesCanvas.width, 'x', popularCoursesCanvas.height);
+        const popularCtx = popularCoursesCanvas.getContext('2d');
+        {% if role == 'teacher' %}
+        var courseLabels = {{ top_courses.keys()|list|tojson if top_courses else []|tojson }};
+        var courseData = {{ top_courses.values()|list|tojson if top_courses else []|tojson }};
+        var chartLabel = 'Số học viên';
+        {% else %}
+        var courseLabels = {{ course_scores.keys()|list|tojson if course_scores else []|tojson }};
+        var courseData = {{ course_scores.values()|list|tojson if course_scores else []|tojson }};
+        var chartLabel = 'Điểm trung bình';
+        {% endif %}
+
+        console.log('Course data:', courseLabels, courseData);
+        if (courseLabels && courseLabels.length > 0) {
+            try {
+                chartInstances.popularCourses = new Chart(popularCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: courseLabels,
+                        datasets: [{
+                            label: chartLabel,
+                            data: courseData,
+                            backgroundColor: [
+                                '#4f46e5',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#8b5cf6'
+                            ],
+                            borderWidth: 0,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        transitions: {
+                            active: {
+                                animation: {
+                                    duration: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        onResize: null,
+                        resizeDelay: 0
+                    }
+                });
+                console.log('✓ Popular courses chart initialized successfully');
+            } catch (error) {
+                console.error('✗ Error initializing popular courses chart:', error);
+            }
+        } else {
+            console.log('No course data available');
+        }
+    } else {
+        console.log('Popular courses canvas not found in DOM');
+    }
+    
+    console.log('=== All charts initialization complete ===');
+}
+
+// Wait for DOM to be ready before adding event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, setting up chart listeners...');
+    
+    // Auto-initialize charts when charts section is shown
+    const chartsSection = document.getElementById('chartsSection');
+    if (chartsSection) {
+        chartsSection.addEventListener('shown.bs.collapse', function() {
+            console.log('Charts section shown event triggered');
+            if (!chartsInitialized) {
+                console.log('First time showing charts, initializing...');
+                setTimeout(function() {
+                    initializeCharts();
+                    chartsInitialized = true;
+                }, 100); // Small delay to ensure DOM is fully rendered
+            } else {
+                console.log('Charts already initialized, skipping...');
+            }
+        });
+        console.log('✓ Chart event listener added successfully');
+    } else {
+        console.error('✗ chartsSection element not found!');
+    }
+});
+
+// Export functions
+function refreshCharts() {
+    location.reload();
+}
+
+function exportData() {
+    alert('Chức năng xuất dữ liệu sẽ được triển khai');
+}
+
+function exportToExcel() {
+    alert('Xuất dữ liệu ra Excel');
+}
+
+function exportToCSV() {
+    alert('Xuất dữ liệu ra CSV');
+}
+
+function exportToPDF() {
+    alert('Xuất báo cáo PDF');
+}
+
+function printReport() {
+    window.print();
+}
+</script>
+{% endblock %}

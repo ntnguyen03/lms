@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Quản lý người dùng</h2>
+    <a href="{{ url_for('add_user') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm người dùng
+    </a>
+</div>
+
+<div class="chart-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Danh sách người dùng</h5>
+        <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary" onclick="filterUsers('all')">Tất cả</button>
+            <button class="btn btn-outline-success" onclick="filterUsers('student')">Sinh viên</button>
+            <button class="btn btn-outline-warning" onclick="filterUsers('teacher')">Giảng viên</button>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover" id="usersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr data-role="{{ user.role }}">
+                    <td>{{ user.id }}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.7rem;">{{ user.username[:2].upper() }}</div>
+                            <span>{{ user.username }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if user.role == 'student' else 'warning' }}">
+                            {{ user.role.title() }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-success">Hoạt động</span>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="viewUser({{ user.id }})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-outline-warning" onclick="editUser({{ user.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteUser({{ user.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterUsers(role) {
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    rows.forEach(row => {
+        if (role === 'all' || row.dataset.role === role) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Update button states
+    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+function viewUser(userId) {
+    window.location.href = `/users/${userId}/view`;
+}
+
+function editUser(userId) {
+    window.location.href = `/users/${userId}/edit`;
+}
+
+function deleteUser(userId) {
+    if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/users/${userId}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LMS Platform{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #06b6d4;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            margin: 0.25rem 0;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-radius: 0 25px 25px 0;
+            margin-right: 1rem;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-link i {
+            width: 20px;
+            margin-right: 0.75rem;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            transition: all 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+        
+        .top-navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .content-area {
+            padding: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stats-card.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .stats-card.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .stats-card.danger {
+            border-left-color: var(--danger-color);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+        }
+        
+        .search-box {
+            border-radius: 25px;
+            border: 2px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            width: 300px;
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .metric-icon {
+            font-size: 2.5rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .metric-details h3 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        .metric-details p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .info-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* AI Chat Popup Styles */
+        .ai-chat-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            max-height: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .ai-chat-popup.show {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .ai-chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .ai-avatar-sm {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        
+        .ai-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f8fafc;
+            max-height: 450px;
+        }
+        
+        .ai-message {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            flex-direction: row-reverse;
+        }
+        
+        .message-content {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 12px;
+            max-width: 80%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .user-message .message-content {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .message-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .quick-actions .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .ai-chat-footer {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .ai-chat-footer input {
+            flex: 1;
+            border-radius: 20px;
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem 1rem;
+        }
+        
+        .ai-chat-footer input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .ai-chat-footer button {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Empty state styles */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state i {
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        
+        .empty-state:hover i {
+            opacity: 0.5;
+        }
+        
+        /* Collapse button hover */
+        [data-bs-toggle="collapse"] {
+            transition: all 0.3s ease;
+        }
+        
+        [data-bs-toggle="collapse"]:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+        
+        /* Dark mode styles */
+        .dark-mode {
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+        }
+        
+        .dark-mode .chart-container,
+        .dark-mode .stats-card,
+        .dark-mode .course-card,
+        .dark-mode .card,
+        .dark-mode .alert {
+            background-color: #2d2d2d !important;
+            color: #ffffff !important;
+            border-color: #404040 !important;
+        }
+        
+        .dark-mode .top-navbar {
+            background-color: #2d2d2d !important;
+            border-bottom-color: #404040 !important;
+        }
+        
+        .dark-mode .search-box {
+            background-color: #404040 !important;
+            color: #ffffff !important;
+            border-color: #555555 !important;
+        }
+        
+        .dark-mode .btn-link {
+            color: #ffffff !important;
+        }
+        
+        .dark-mode .btn-link:hover {
+            color: #007bff !important;
+        }
+        
+        .dark-mode h1,
+        .dark-mode h2,
+        .dark-mode h3,
+        .dark-mode h4,
+        .dark-mode h5,
+        .dark-mode h6,
+        .dark-mode p,
+        .dark-mode span,
+        .dark-mode div,
+        .dark-mode .text-muted {
+            color: #ffffff !important;
+        }
+        
+        .dark-mode .text-primary {
+            color: #66b3ff !important;
+        }
+        
+        .dark-mode .text-success {
+            color: #66ff99 !important;
+        }
+        
+        .dark-mode .text-warning {
+            color: #ffcc66 !important;
+        }
+        
+        .dark-mode .text-danger {
+            color: #ff6666 !important;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Desktop sidebar toggle */
+        #sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        #sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        #main-content {
+            transition: margin-left 0.3s ease;
+        }
+        
+        #main-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Mobile sidebar styles */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                top: 0;
+                left: -300px;
+                width: 300px;
+                height: 100vh;
+                z-index: 1050;
+                transition: left 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+                transform: none !important;
+            }
+            
+            #sidebar.show {
+                left: 0;
+            }
+            
+            #main-content {
+                margin-left: 0 !important;
+            }
+            
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                display: none;
+            }
+            
+            #sidebar.show ~ .sidebar-overlay {
+                display: block;
+            }
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar-overlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">
+                <i class="fas fa-graduation-cap me-2"></i>
+                <span class="brand-text">EduLearn</span>
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/courses" class="nav-link {% if request.endpoint == 'courses' %}active{% endif %}">
+                        <i class="fas fa-book"></i>
+                        <span class="nav-text">Khóa học</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/grades" class="nav-link {% if request.endpoint == 'grades' %}active{% endif %}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span class="nav-text">Điểm số</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/analytics" class="nav-link {% if request.endpoint == 'analytics' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Phân tích</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/ai-support" class="nav-link {% if request.endpoint == 'ai_support' %}active{% endif %}">
+                        <i class="fas fa-robot"></i>
+                        <span class="nav-text">AI Hỗ trợ</span>
+                    </a>
+                </li>
+                {% if current_user.is_teacher() %}
+                <li class="nav-item">
+                    <a href="/users" class="nav-link {% if request.endpoint == 'users' %}active{% endif %}">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Quản lý Users</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer mt-auto p-3">
+            <div class="text-center text-white-50">
+                <small>nam dep trai</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Chat Popup -->
+    <div id="aiChatPopup" class="ai-chat-popup">
+        <div class="ai-chat-header">
+            <div class="d-flex align-items-center">
+                <div class="ai-avatar me-2">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0">AI Trợ Lý Học Tập</h6>
+                    <small class="text-success"><i class="fas fa-circle" style="font-size: 8px;"></i> Đang hoạt động</small>
+                </div>
+            </div>
+            <button class="btn btn-link text-white p-0" onclick="toggleAIChat()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="ai-chat-body" id="popupAiChatBody">
+            <div class="ai-message">
+                <div class="ai-avatar-sm">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>Xin chào! Tôi là trợ lý AI của EduLearn. Tôi có thể giúp gì cho bạn hôm nay?</p>
+                    <div class="quick-actions mt-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="popupAskAI('Điểm của tôi thế nào?')">
+                            <i class="fas fa-chart-bar me-1"></i>Xem điểm số
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="popupAskAI('Gợi ý học tập')">
+                            <i class="fas fa-lightbulb me-1"></i>Gợi ý học tập
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" onclick="popupAskAI('Bài tập sắp đến hạn')">
+                            <i class="fas fa-clock me-1"></i>Deadline
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ai-chat-footer">
+            <input type="text" id="popupAiChatInput" class="form-control" placeholder="Nhập câu hỏi của bạn..." 
+                   onkeypress="if(event.key==='Enter') popupSendAIMessage()">
+            <button class="btn btn-primary" onclick="popupSendAIMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link me-3" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-box-container">
+                    <div class="position-relative">
+                        <input id="globalSearchBox" type="text" class="search-box" placeholder="Tìm kiếm khóa học, người dùng..." onkeypress="if(event.key==='Enter'){performGlobalSearch();}">
+                        <i class="fas fa-search position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); color: #6b7280;"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center">
+                <button class="btn btn-link me-2" title="Dark mode" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon" id="darkModeIcon"></i>
+                </button>
+                <button class="btn btn-link me-2 position-relative" title="Thông báo" onclick="showNotifications()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="btn btn-link me-2 position-relative" title="AI Trợ lý" onclick="toggleAIChat()">
+                    <i class="fas fa-robot"></i>
+                    <span class="notification-badge" style="background: #10b981;">AI</span>
+                </button>
+                <button class="btn btn-link me-2" title="Cài đặt" onclick="window.location.href='{{ url_for('settings') }}'">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="dropdown me-2">
+                    <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <img src="https://flagcdn.com/w20/vn.png" alt="VN" class="me-1" style="width: 20px;">
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="changeLanguage('vi')"><img src="https://flagcdn.com/w20/vn.png" alt="VN" class="me-2">Tiếng Việt</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')"><img src="https://flagcdn.com/w20/us.png" alt="US" class="me-2">English</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-link me-2" title="Toàn màn hình" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand" id="fullscreenIcon"></i>
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                        <div class="user-avatar me-2" style="width: 35px; height: 35px; font-size: 0.8rem;">{{ current_user.username[:2].upper() }}</div>
+                        <div class="text-start">
+                            <div class="fw-bold">{{ current_user.username }}</div>
+                            <small class="text-muted">{{ current_user.role.upper() }}</small>
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Area -->
+        <div class="content-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <script>
+        function performGlobalSearch() {
+            const input = document.getElementById('globalSearchBox');
+            if (!input) return;
+            const q = input.value.trim();
+            if (!q) return;
+            // Redirect to server-side search route
+            window.location.href = '{{ url_for("search") }}?q=' + encodeURIComponent(q);
+        }
+
+        // Allow clicking the search icon to trigger search (delegated)
+        document.addEventListener('click', function(e) {
+            const icon = e.target.closest('.search-box-container');
+            if (!icon) return;
+            const clicked = e.target;
+            if (clicked.classList && clicked.classList.contains('fa-search')) {
+                performGlobalSearch();
+            }
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js from local file -->
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <script>
+        // Check if Chart.js is loaded
+        console.log('✓ Chart.js loaded:', typeof Chart !== 'undefined');
+        if (typeof Chart !== 'undefined') {
+            console.log('✓ Chart.js version:', Chart.version);
+        } else {
+            console.error('✗ Chart.js failed to load! Check network tab.');
+        }
+        
+        // Sidebar toggle functionality
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (window.innerWidth <= 768) {
+                // Mobile behavior
+                sidebar.classList.toggle('show');
+            } else {
+                // Desktop behavior
+                sidebar.classList.toggle('hidden');
+                mainContent.classList.toggle('expanded');
+            }
+        });
+        
+        // Mobile overlay click
+        if (window.innerWidth <= 768) {
+            document.querySelector('.sidebar-overlay').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.remove('show');
+            });
+        }
+        
+        // Top navigation functions
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.getElementById('darkModeIcon');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+        
+        function showNotifications() {
+            // Create notification dropdown
+            const notifications = [
+                { title: 'Bài tập mới', message: 'Có bài tập mới trong khóa học Python', time: '2 phút trước' },
+                { title: 'Deadline sắp tới', message: 'Bài tập Data Analysis hạn trong 1 ngày', time: '1 giờ trước' },
+                { title: 'Điểm số mới', message: 'Bạn đã nhận điểm cho bài tập Machine Learning', time: '3 giờ trước' }
+            ];
+            
+            let notificationHTML = '<div class="dropdown-menu show position-absolute" style="right: 0; top: 100%; min-width: 300px;">';
+            notifications.forEach(notif => {
+                notificationHTML += `
+                    <div class="dropdown-item-text">
+                        <h6 class="mb-1">${notif.title}</h6>
+                        <p class="mb-1 small">${notif.message}</p>
+                        <small class="text-muted">${notif.time}</small>
+                    </div>
+                `;
+            });
+            notificationHTML += '</div>';
+            
+            // Show notification dropdown
+            const bell = document.querySelector('[onclick="showNotifications()"]');
+            bell.insertAdjacentHTML('afterend', notificationHTML);
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                const dropdown = document.querySelector('.dropdown-menu.show');
+                if (dropdown) dropdown.remove();
+            }, 5000);
+        }
+        
+        // AI Chat Functions
+        function toggleAIChat() {
+            const popup = document.getElementById('aiChatPopup');
+            popup.classList.toggle('show');
+        }
+        
+        let popupAiMessageCounter = 0;
+        let popupAiIsSending = false;
+
+        function popupFormatMessage(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+
+        function popupAddMessage(text, sender, options = {}) {
+            const chatBody = document.getElementById('popupAiChatBody');
+            if (!chatBody) {
+                return null;
+            }
+
+            const messageDiv = document.createElement('div');
+            const messageId = `popup-ai-message-${popupAiMessageCounter++}`;
+            messageDiv.id = messageId;
+            messageDiv.className = sender === 'user' ? 'ai-message user-message' : 'ai-message';
+
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <p>${popupFormatMessage(text)}</p>
+                    </div>
+                    <div class="ai-avatar-sm" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                        <i class="fas fa-user"></i>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="ai-avatar-sm">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>${popupFormatMessage(text)}</p>
+                    </div>
+                `;
+            }
+
+            if (options.isPlaceholder) {
+                messageDiv.dataset.placeholder = 'true';
+            }
+
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return messageId;
+        }
+
+        function popupUpdateMessage(messageId, text) {
+            const messageDiv = document.getElementById(messageId);
+            if (!messageDiv) {
+                return;
+            }
+
+            const content = messageDiv.querySelector('.message-content > p');
+            if (content) {
+                content.innerHTML = popupFormatMessage(text);
+            }
+            messageDiv.dataset.placeholder = 'false';
+        }
+
+        function popupToggleControls(disabled) {
+            const input = document.getElementById('popupAiChatInput');
+            const sendButton = document.querySelector('#aiChatPopup .btn.btn-primary');
+            if (input) {
+                input.disabled = disabled;
+            }
+            if (sendButton) {
+                sendButton.disabled = disabled;
+            }
+        }
+
+        async function popupSendAIMessage() {
+            if (popupAiIsSending) {
+                return;
+            }
+
+            const input = document.getElementById('popupAiChatInput');
+            if (!input) {
+                return;
+            }
+
+            const message = input.value.trim();
+            if (!message) {
+                return;
+            }
+
+            popupAddMessage(message, 'user');
+            input.value = '';
+
+            popupAiIsSending = true;
+            popupToggleControls(true);
+
+            const placeholderId = popupAddMessage('AI đang phân tích câu hỏi của bạn...', 'ai', { isPlaceholder: true });
+
+            try {
+                const response = await fetch('{{ url_for("ai_chat_api") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.response) {
+                    throw new Error(data.error || 'Không nhận được phản hồi hợp lệ từ AI.');
+                }
+
+                popupUpdateMessage(placeholderId, data.response);
+            } catch (error) {
+                popupUpdateMessage(placeholderId, 'Xin lỗi, hiện tại trợ lý AI chưa thể phản hồi. Vui lòng thử lại sau.');
+            } finally {
+                popupAiIsSending = false;
+                popupToggleControls(false);
+            }
+        }
+
+        function popupAskAI(question) {
+            const input = document.getElementById('popupAiChatInput');
+            if (!input) {
+                return;
+            }
+
+            input.value = question;
+            popupSendAIMessage();
+        }
+        
+        function changeLanguage(lang) {
+            if (lang === 'vi') {
+                alert('Chuyển sang tiếng Việt');
+            } else {
+                alert('Switch to English');
+            }
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.getElementById('fullscreenIcon').className = 'fas fa-compress';
+            } else {
+                document.exitFullscreen();
+                document.getElementById('fullscreenIcon').className = 'fas fa-expand';
+            }
+        }
+        
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeIcon').className = 'fas fa-sun';
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

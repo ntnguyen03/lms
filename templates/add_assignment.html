@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Thêm bài tập - {{ course.name }} - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus me-2"></i>Thêm bài tập mới</h2>
+    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Quay lại
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <h5 class="mb-3">{{ course.name }}</h5>
+            
+            <form method="POST" action="{{ url_for('add_assignment', course_id=course.id) }}">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Tên bài tập</label>
+                    <input type="text" class="form-control" id="title" name="title" 
+                           placeholder="Ví dụ: Bài tập 1 - Cơ bản" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="deadline" class="form-label">Hạn nộp (tùy chọn)</label>
+                    <input type="datetime-local" class="form-control" id="deadline" name="deadline">
+                    <div class="form-text">Để trống nếu không có hạn nộp cụ thể</div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Thêm bài tập
+                    </button>
+                    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="btn btn-secondary">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

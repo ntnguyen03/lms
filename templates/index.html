@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EduLearn{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+            <div class="card-body text-white p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="mb-2">Học tập hiệu quả cùng chúng tôi!</h2>
+                        <p class="mb-3">Nhận ưu đãi 30% cho mọi khóa học trong tháng 1.</p>
+                        <div class="d-flex gap-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-graduation-cap me-2"></i>
+                                <span>Sinh viên: {{ total_users }}+</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-tie me-2"></i>
+                                <span>Giảng viên: {{ total_courses }}+</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-graduation-cap" style="font-size: 4rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Tổng sinh viên</h6>
+                    <h3 class="mb-0 text-primary">{{ total_users }}</h3>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Khóa học</h6>
+                    <h3 class="mb-0 text-success">{{ total_courses }}</h3>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-book fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Ghi danh</h6>
+                    <h3 class="mb-0 text-warning">{{ total_enrollments }}</h3>
+                </div>
+                <div class="text-warning">
+                    <i class="fas fa-user-plus fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card danger">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Hoàn thành</h6>
+                    <h3 class="mb-0 text-danger">{{ (total_enrollments * 0.8) | int }}</h3>
+                </div>
+                <div class="text-danger">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <h5 class="mb-3">Tiến độ học tập hàng tháng</h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="monthlyProgressChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container">
+            <h5 class="mb-3">Tỷ lệ hoàn thành</h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="completionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Courses -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Khóa học phổ biến</h5>
+                <a href="/courses" class="btn btn-outline-primary btn-sm">Xem tất cả</a>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="course-card text-center">
+                        <div class="mb-3">
+                            <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-paint-brush fa-lg"></i>
+                            </div>
+                        </div>
+                        <h6>UI/UX Design</h6>
+                        <p class="text-muted small">{{ total_courses }}+ Khóa học</p>
+                        <button class="btn btn-warning btn-sm">Xem khóa học</button>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="course-card text-center">
+                        <div class="mb-3">
+                            <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-bullhorn fa-lg"></i>
+                            </div>
+                        </div>
+                        <h6>Marketing</h6>
+                        <p class="text-muted small">{{ (total_courses * 0.8) | int }}+ Khóa học</p>
+                        <button class="btn btn-danger btn-sm">Xem khóa học</button>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="course-card text-center">
+                        <div class="mb-3">
+                            <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-code fa-lg"></i>
+                            </div>
+                        </div>
+                        <h6>Web Development</h6>
+                        <p class="text-muted small">{{ total_courses }}+ Khóa học</p>
+                        <button class="btn btn-success btn-sm">Xem khóa học</button>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="course-card text-center">
+                        <div class="mb-3">
+                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-calculator fa-lg"></i>
+                            </div>
+                        </div>
+                        <h6>Toán học</h6>
+                        <p class="text-muted small">{{ (total_courses * 1.5) | int }}+ Khóa học</p>
+                        <button class="btn btn-primary btn-sm">Xem khóa học</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Section -->
+{% if sales_summary %}
+<div class="row">
+    <div class="col-12">
+        <div class="chart-container">
+            <h5 class="mb-3">Phân tích dữ liệu bán hàng</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Thông tin file Excel:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Số dòng:</strong> {{ sales_summary.num_rows if sales_summary.num_rows is defined else sales_summary['num_rows'] }}</li>
+                        <li><strong>Cột:</strong> {{ (sales_summary.columns if sales_summary.columns is defined else sales_summary['columns']) | length }}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    {% if sales_summary.totals is defined or sales_summary['totals'] %}
+                    <h6>Tổng theo cột:</h6>
+                    <div class="small">
+                        {% for key, value in (sales_summary.totals if sales_summary.totals is defined else sales_summary['totals']).items() %}
+                        <div class="d-flex justify-content-between">
+                            <span>{{ key }}:</span>
+                            <span>{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Current Activity Section -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <h5 class="mb-3">Hoạt động hiện tại</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Tiến độ hàng tháng</h6>
+                            <p class="card-text small text-muted">Đây là cải tiến mới nhất</p>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar text-primary me-2"></i>
+                                <span class="small">Tháng {{ current_month }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <div class="card border-0 bg-warning text-white">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title small">{{ (total_enrollments * 45) | int }}K+</h6>
+                                    <p class="card-text small mb-0">Khóa học hoàn thành</p>
+                                    <small>Dữ liệu mới nhất</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="card border-0 bg-danger text-white">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title small">{{ (total_enrollments * 20) | int }}K+</h6>
+                                    <p class="card-text small mb-0">Khóa học video</p>
+                                    <i class="fas fa-play float-end"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="chart-container">
+            <h5 class="mb-3">Giảng viên xuất sắc</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="small text-muted">Top giảng viên</span>
+                <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex align-items-center px-0">
+                    <div class="user-avatar me-3" style="width: 40px; height: 40px;">NY</div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">Nguyễn Văn A</h6>
+                        <small class="text-muted">5 Khóa học Design</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary">Khóa học</button>
+                </div>
+                <div class="list-group-item d-flex align-items-center px-0">
+                    <div class="user-avatar me-3" style="width: 40px; height: 40px;">TT</div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">Trần Thị B</h6>
+                        <small class="text-muted">4 Khóa học Marketing</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary">Khóa học</button>
+                </div>
+                <div class="list-group-item d-flex align-items-center px-0">
+                    <div class="user-avatar me-3" style="width: 40px; height: 40px;">LV</div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">Lê Văn C</h6>
+                        <small class="text-muted">6 Khóa học Web Dev</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary">Khóa học</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- School Performance & Pass Percentage -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h5 class="mb-3">Top 5 Hiệu suất Trường học</h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="schoolPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h5 class="mb-3">Tỷ lệ đậu tổng thể</h5>
+            <div style="position: relative; height: 300px;">
+                <canvas id="passPercentageChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Usage -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h5 class="mb-3">Sử dụng nội dung</h5>
+            <div class="d-flex align-items-center mb-3">
+                <span class="text-success fw-bold me-2">+12.5%</span>
+                <span class="text-muted">cao hơn tháng trước</span>
+            </div>
+            <div style="position: relative; height: 250px;">
+                <canvas id="contentUsageChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h5 class="mb-3">Thao tác nhanh</h5>
+            <div class="d-grid gap-2">
+                <a href="/quick-action/create-sample-data" class="btn btn-primary">
+                    <i class="fas fa-seedling me-2"></i>Tạo dữ liệu mẫu
+                </a>
+                <a href="/quick-action/create-course" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Tạo khóa học mới
+                </a>
+                <a href="/quick-action/add-user" class="btn btn-info">
+                    <i class="fas fa-user-plus me-2"></i>Thêm người dùng
+                </a>
+                <a href="/quick-action/view-analytics" class="btn btn-warning">
+                    <i class="fas fa-chart-line me-2"></i>Xem phân tích chi tiết
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Monthly Progress Chart
+const monthlyCtx = document.getElementById('monthlyProgressChart').getContext('2d');
+new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+        datasets: [{
+            label: 'Tiến độ (%)',
+            data: [20, 35, 45, 60, 70, 85],
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        transitions: {
+            active: {
+                animation: {
+                    duration: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            }
+        },
+        onResize: null,
+        resizeDelay: 0
+    }
+});
+
+// Completion Chart
+const completionCtx = document.getElementById('completionChart').getContext('2d');
+new Chart(completionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Hoàn thành', 'Chưa hoàn thành'],
+        datasets: [{
+            data: [{{ (total_enrollments * 0.8) | int }}, {{ (total_enrollments * 0.2) | int }}],
+            backgroundColor: ['#10b981', '#e5e7eb'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        transitions: {
+            active: {
+                animation: {
+                    duration: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        onResize: null,
+        resizeDelay: 0
+    }
+});
+
+// School Performance Chart
+const schoolPerformanceCtx = document.getElementById('schoolPerformanceChart').getContext('2d');
+new Chart(schoolPerformanceCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Trường A', 'Trường B', 'Trường C', 'Trường D', 'Trường E'],
+        datasets: [{
+            label: 'Hiệu suất (%)',
+            data: [85, 92, 78, 88, 95],
+            backgroundColor: ['#4f46e5', '#8b5cf6', '#10b981', '#ef4444', '#f59e0b'],
+            borderWidth: 0,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        transitions: {
+            active: {
+                animation: {
+                    duration: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            }
+        },
+        onResize: null,
+        resizeDelay: 0
+    }
+});
+
+// Pass Percentage Chart
+const passPercentageCtx = document.getElementById('passPercentageChart').getContext('2d');
+new Chart(passPercentageCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Đậu', 'Trượt'],
+        datasets: [{
+            data: [78, 22],
+            backgroundColor: ['#8b5cf6', '#e5e7eb'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        transitions: {
+            active: {
+                animation: {
+                    duration: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        onResize: null,
+        resizeDelay: 0
+    }
+});
+
+// Content Usage Chart
+const contentUsageCtx = document.getElementById('contentUsageChart').getContext('2d');
+new Chart(contentUsageCtx, {
+    type: 'line',
+    data: {
+        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+        datasets: [{
+            label: 'Sử dụng (%)',
+            data: [65, 70, 68, 75, 80, 85, 82, 88, 90, 85, 92, 95],
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#f59e0b',
+            pointBorderColor: '#f59e0b',
+            pointRadius: 6,
+            pointHoverRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        transitions: {
+            active: {
+                animation: {
+                    duration: 0
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            }
+        },
+        onResize: null,
+        resizeDelay: 0
+    }
+});
+</script>
+{% endblock %}

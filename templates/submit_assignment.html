@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Nộp bài tập - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Nộp bài tập</h2>
+    <a href="{{ url_for('course_detail', course_id=assignment.course_id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Quay lại
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <h5>{{ assignment.title }}</h5>
+            {% if assignment.deadline %}
+                <p class="text-muted">Hạn nộp: {{ assignment.deadline.strftime('%d/%m/%Y %H:%M') }}</p>
+            {% endif %}
+            
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <!-- Students should NOT enter a score when submitting. Only upload file. -->
+                <div class="mb-3">
+                    {{ form.file.label(class="form-label") }}
+                    {{ form.file(class="form-control") }}
+                    {% if form.file.errors %}
+                        <div class="text-danger">
+                            {% for error in form.file.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('course_detail', course_id=assignment.course_id) }}" class="btn btn-secondary me-md-2">Hủy</a>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

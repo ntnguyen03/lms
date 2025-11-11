@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Hồ sơ cá nhân - EduLearn{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Hồ sơ cá nhân</h2>
+    <a href="{{ url_for('settings') }}" class="btn btn-outline-primary">
+        <i class="fas fa-cog me-2"></i>Cài đặt
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="chart-container text-center">
+            <div class="user-avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 2rem;">
+                {{ user.username[:2].upper() }}
+            </div>
+            <h4>{{ user.username }}</h4>
+            <p class="text-muted">{{ user.role.title() }}</p>
+            
+            <div class="mt-4">
+                <h6>Thống kê học tập</h6>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <h5 class="text-primary mb-1">{{ "%.1f"|format(avg_score) }}</h5>
+                            <small class="text-muted">Điểm TB</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <h5 class="text-success mb-1">{{ login_count }}</h5>
+                            <small class="text-muted">Lần đăng nhập</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3">
+                            <h5 class="text-warning mb-1">{{ submissions_count }}</h5>
+                            <small class="text-muted">Bài nộp</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3">
+                            <h5 class="text-info mb-1">{{ enrollments_count }}</h5>
+                            <small class="text-muted">Khóa học</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="chart-container mb-4">
+            <h5>Thông tin cá nhân</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Tên đăng nhập:</strong> {{ user.username }}</p>
+                    <p><strong>Vai trò:</strong> {{ user.role.title() }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>ID:</strong> {{ user.id }}</p>
+                    <p><strong>Trạng thái:</strong> 
+                        <span class="badge bg-success">Hoạt động</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h5>Hoạt động gần đây</h5>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item px-0">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Đăng nhập hệ thống</h6>
+                            <small class="text-muted">Hôm nay</small>
+                        </div>
+                        <small class="text-muted">Vừa xong</small>
+                    </div>
+                </div>
+                
+                <div class="list-group-item px-0">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Xem khóa học</h6>
+                            <small class="text-muted">Nhập môn Lập trình</small>
+                        </div>
+                        <small class="text-muted">2 giờ trước</small>
+                    </div>
+                </div>
+                
+                <div class="list-group-item px-0">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Nộp bài tập</h6>
+                            <small class="text-muted">Bài tập Python cơ bản</small>
+                        </div>
+                        <small class="text-muted">1 ngày trước</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
