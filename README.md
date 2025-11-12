@@ -38,7 +38,6 @@ Hệ thống quản lý học tập trực tuyến (LMS) được xây dựng v�
     <img src="https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap"/>
     <img src="https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js"/>
 </p>
-**PYTHON (FLASK)**
 
 **Công nghệ sử dụng**
 * **Backend**: Flask (Python)
@@ -46,7 +45,7 @@ Hệ thống quản lý học tập trực tuyến (LMS) được xây dựng v�
 * **Frontend**: Bootstrap 5, Chart.js
 * **Authentication**: Flask-Login
 * **Data Analysis**: Pandas
-* **AI**: Rule-based recommendations
+* **AI**: Rule-based recommendations (Google AI Studio)
 
 ## 3. Hình ảnh các chức năng
 Giao diện Dashboard
@@ -66,23 +65,20 @@ Giao diện AI hỗ trợ (Giảng viên, Sinh viên)
 **1. Cài đặt dependencies**
 ```bash
 pip install -r requirements.txt
-Notification system
-
-Mobile app
 ```
-**2. Chạy ứng dụng
+**2. Chạy ứng dụng**
 
 ```Bash
 
 python app.py
 ```
-**3. Truy cập ứng dụng
+**3. Truy cập ứng dụng**
 
 URL: http://localhost:5000
 
 Tạo dữ liệu mẫu: Truy cập /seed (hoặc /quick-action/create-sample-data)
 
-**4. Tài khoản demo
+**4. Tài khoản demo**
 
 Giảng viên: Username: teacher1 / Password: teacher123
 
