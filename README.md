@@ -97,21 +97,21 @@ chuyen_doi_so/
 │   └── ...
 └── static/             # CSS, JS, images
 ```
-▶️ 5. Cài đặt và chạy
-1. Cài đặt dependencies
+## ▶️ 5. Cài đặt và chạy
+###1. Cài đặt dependencies
 Bash
 
 pip install -r requirements.txt
-2. Chạy ứng dụng
+###2. Chạy ứng dụng
 Bash
 
 python app.py
-3. Truy cập ứng dụng
+###3. Truy cập ứng dụng
 URL: http://localhost:5000
 
 Tạo dữ liệu mẫu: Truy cập /seed
 
-🧑‍💻 6. Tài khoản demo
+##🧑‍💻 6. Tài khoản demo
 Giảng viên:
 Username: teacher1
 
@@ -127,7 +127,7 @@ Username: admin
 
 Password: admin123
 
-🔌 7. API Endpoints
+##🔌 7. API Endpoints
 Authentication
 GET /login - Trang đăng nhập
 
@@ -160,7 +160,7 @@ GET /analytics - Trang phân tích
 
 GET /api/stats - API thống kê và AI recommendations
 
-🤖 8. Tính năng AI
+##🤖 8. Tính năng AI
 Rule-based Recommendations
 Hệ thống phân tích dữ liệu học tập và đưa ra gợi ý dựa trên:
 
@@ -179,7 +179,7 @@ Phân tích xu hướng học tập
 
 Đánh giá rủi ro học tập
 
-🧪 9. Demo và Testing
+##🧪 9. Demo và Testing
 Tạo dữ liệu mẫu: Truy cập /seed
 
 Đăng nhập: Sử dụng tài khoản demo
@@ -192,7 +192,7 @@ Nộp bài tập: Sinh viên nộp bài và nhận điểm
 
 Xem analytics: Phân tích dữ liệu và AI recommendations
 
-🔮 10. Mở rộng trong tương lai
+##🔮 10. Mở rộng trong tương lai
 ML nâng cao
 Thu thập dữ liệu log + điểm
 
