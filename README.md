@@ -19,7 +19,7 @@
 
 </div>
 
-# 📓📚 XÂY DỰNG NỀN TẢNG SỐ HỖ TRỢ HỌC TẬP CHO SINH VIÊN DỰA TRÊN LMS VÀ PHÂN TÍCH DỮ LIỆU
+# 📓📚 Xây dựng nền tảng số hỗ trợ học tập cho sinh viên dựa trên LMS và phân tích dữ liệu
 
 ## 1. Giới thiệu
 Hệ thống quản lý học tập trực tuyến (LMS) được xây dựng với Flask, theo đúng pipeline đã đề xuất. Ứng dụng cung cấp các chức năng chính như:
