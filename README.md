@@ -88,11 +88,12 @@ Admin: Username: admin / Password: admin123
 
 ## 5. Ghi chú
 Hệ thống được thiết kế đơn giản, dễ hiểu và dễ mở rộng.
-
-Phù hợp cho bài tập lớn và demo.
-
 Code được tổ chức theo đúng pipeline đề xuất.
+Hệ thống AI ban đầu dựa trên luật (rule-based), có thể mở rộng tích hợp ML nâng cao (ví dụ: Logistic Regression) để dự đoán nguy cơ rớt học, chatbot tích hợp Google Gemini API để trả lời câu hỏi
 
-Sẵn sàng để đi thi cuối kỳ.
+## 📝 Thông tin cá nhân
+- Nguyễn Trường Nam - CNTT 16-03
+- Email: truongnam0304@gmail.com
+- Phone: 0397367184
+© 2025 AIoTLab, Faculty of Information Technology, DaiNam University. All rights reserved.
 
-Hệ thống AI ban đầu dựa trên luật (rule-based), có thể mở rộng tích hợp ML nâng cao (ví dụ: Logistic Regression) để dự đoán nguy cơ rớt học.
