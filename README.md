@@ -87,8 +87,11 @@ Sinh viên: Username: student1 / Password: student123
 Admin: Username: admin / Password: admin123
 
 ## 5. Ghi chú
+
 Hệ thống được thiết kế đơn giản, dễ hiểu và dễ mở rộng.
+
 Code được tổ chức theo đúng pipeline đề xuất.
+
 Hệ thống AI ban đầu dựa trên luật (rule-based), có thể mở rộng tích hợp ML nâng cao (ví dụ: Logistic Regression) để dự đoán nguy cơ rớt học, chatbot tích hợp Google Gemini API để trả lời câu hỏi
 
 ## 📝 Thông tin cá nhân
