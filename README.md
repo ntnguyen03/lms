@@ -56,8 +56,11 @@ Giao diện quản lý điểm số
 <img width="1905" height="911" alt="Screenshot 2025-11-12 221551" src="https://github.com/user-attachments/assets/3d8d59fb-b3b4-49bc-b05b-c2d2aa269f97" />
 Giao diện chức năng phân tích sinh viên
 <img width="1899" height="910" alt="Screenshot 2025-11-12 221627" src="https://github.com/user-attachments/assets/b0d30a47-b212-4217-85a8-fc1d474d7057" />
-Giao diện AI hỗ trợ (Giảng viên, Sinh viên)
-<img width="1904" height="908" alt="Screenshot 2025-11-12 221635" src="https://github.com/user-attachments/assets/44ff0839-e06b-485a-98c0-53affcefa8e2" />
+Giao diện AI hỗ trợ (Sinh viên)
+<img width="1902" height="910" alt="Screenshot 2025-11-16 235649" src="https://github.com/user-attachments/assets/75a264d4-27ef-4c24-861d-a9d600529e66" />
+Giao diện AI hỗ trợ (Giảng viên)
+<img width="1904" height="914" alt="Screenshot 2025-11-16 235310" src="https://github.com/user-attachments/assets/2a77569b-9d3b-47c6-abe8-3b719ebb0dfd" />
+
 
 
 ## 4. Cách chạy chương trình
